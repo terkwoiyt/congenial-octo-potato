@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HBD BROWHH</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+  overflow: hidden;
+}
+
+.slide {
+  display: none;
+  text-align: center;
+  animation: fade 0.8s ease;
+}
+
+.active {
+  display: block;
+}
+
+@keyframes fade {
+  from {opacity:0;}
+  to {opacity:1;}
+}
+
+/* tombol */
+button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: 0.3s;
+}
+
+.unlock-btn {
+  background: red;
+  color: white;
+}
+
+.unlock-btn.success {
+  background: green;
+}
+
+/* foto */
+.photo {
+  width: 220px;
+  border-radius: 20px;
+  margin: 15px 0;
+  box-shadow: 0 0 25px rgba(255,255,255,0.4);
+}
+
+/* judul */
+.big-title {
+  font-size: 40px;
+  margin: 10px 0;
+  text-shadow: 0 0 15px #ff00ff;
+}
+
+/* emoji kedip */
+.blink {
+  font-size: 26px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% {opacity:1;}
+  50% {opacity:0.3;}
+  100% {opacity:1;}
+}
+
+input {
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  width:80px;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SLIDE 1 -->
+<div class="slide active" id="slide1">
+  <h2>yor berdhdey??</h2>
+  <input type="number" id="date" placeholder="Tanggal">
+  <input type="number" id="month" placeholder="Bulan">
+  <br>
+  <button class="unlock-btn" id="unlockBtn" onclick="checkDate()">BUKA NIH 🔒</button>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="slide" id="slide2">
+  <div class="blink">✨🔥✨🔥✨🔥✨🔥✨🔥✨🔥✨🔥✨🔥✨🔥✨🔥</div>
+  
+  <h3>sapep kita begaya😛</h3>
+  
+  <img src="Pictures/Canva/20260210_205310_0000.jpg" class="photo">
+  
+  <div class="big-title">HBD BROWHH.😈</div>
+  
+  <p>Siempre te apoyaré</p>
+  <p>baubau auza jg jdi hengker👽</p>
+  
+  <button onclick="nextSlide()">next ga nih?</button>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="slide" id="slide3">
+  <img src="Pictures/Canva/Desain tanpa judul_20260210_205518_0000.j" class="photo">
+  <p>udah si gtu aja, ae cm mw pmer.</p>
+</div>
+
+<script>
+function checkDate() {
+  var d = document.getElementById("date").value;
+  var m = document.getElementById("month").value;
+  var btn = document.getElementById("unlockBtn");
+
+  if (d == 10 && m == 2) {
+    btn.classList.add("success");
+    btn.innerHTML = "TERBUKA 🔓";
+    
+    setTimeout(function() {
+      document.getElementById("slide1").classList.remove("active");
+      document.getElementById("slide2").classList.add("active");
+    }, 600);
+    
+  } else {
+    alert("Salah tanggal bro 😈");
+  }
+}
+
+function nextSlide() {
+  document.getElementById("slide2").classList.remove("active");
+  document.getElementById("slide3").classList.add("active");
+}
+</script>
+
+</body>
+</html>
