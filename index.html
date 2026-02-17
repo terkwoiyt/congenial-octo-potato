@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ramadan Faith Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --lilac:#b89cff;
+  --soft:#f4efff;
+  --dark:#6b4fd8;
+}
+
+body{
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  background:var(--soft);
+  color:#333;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+header{
+  background:var(--lilac);
+  color:white;
+  padding:20px;
+  border-radius:18px;
+  text-align:center;
+}
+
+input[type="text"]{
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  margin-top:10px;
+}
+
+.progress-box{
+  margin:20px 0;
+}
+
+.progress-bar{
+  height:18px;
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:var(--dark);
+  transition:.4s;
+}
+
+.quote{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:20px;
+  text-align:center;
+  font-style:italic;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:15px;
+  overflow:hidden;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:center;
+  font-size:13px;
+}
+
+th{
+  background:var(--lilac);
+  color:white;
+  position:sticky;
+  top:0;
+}
+
+.habit{
+  text-align:left;
+  font-weight:600;
+  background:#f7f3ff;
+  position:sticky;
+  left:0;
+}
+
+.battery{
+  width:22px;
+  height:40px;
+  border:2px solid var(--dark);
+  border-radius:5px;
+  position:relative;
+  margin:auto;
+}
+
+.battery::after{
+  content:"";
+  width:10px;
+  height:4px;
+  background:var(--dark);
+  position:absolute;
+  top:-6px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.fill{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:0%;
+  background:var(--lilac);
+  transition:.3s;
+}
+
+#finalMessage{
+  margin:25px;
+  font-size:22px;
+  color:var(--dark);
+  font-weight:bold;
+  text-align:center;
+}
+
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  background:var(--dark);
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>Ramadan Faith Planner</h1>
+  <input id="username" placeholder="Enter your name">
+</header>
+
+<div class="progress-box">
+  <strong>Total Progress</strong>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<div class="quote" id="quoteBox"></div>
+
+<table id="planner"></table>
+
+<div id="finalMessage"></div>
+
+<button onclick="resetAll()">Reset My Planner</button>
+
+<audio id="clickSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-click-1110.mp3">
+</audio>
+
+</div>
+
+<script>
+const habits=[
+"Sholat Tahajud","Fasting","Qabliyah Shubuh","Sholat Shubuh",
+"Morning Dhikr","Qur'an Recitation","Sholat Dhuha","Sholat Dzuhur",
+"Sholat Ashar","Evening Dhikr","Sholat Maghrib","Ba'diyah Maghrib",
+"Sholat Isya","Tarawih","Surah Al-Kahfi (Friday)"
+];
+
+const quotes=[
+"Indeed, prayer prohibits immorality and wrongdoing. (Qur'an 29:45)",
+"So remember Me; I will remember you. (Qur'an 2:152)",
+"Allah does not burden a soul beyond that it can bear. (2:286)",
+"Successful indeed are the believers. (23:1)"
+];
+
+const days=30;
+const table=document.getElementById("planner");
+const sound=document.getElementById("clickSound");
+
+function save(key,val){localStorage.setItem(key,JSON.stringify(val))}
+function load(key,def){return JSON.parse(localStorage.getItem(key))||def}
+
+document.getElementById("quoteBox").innerText=
+quotes[new Date().getDate()%quotes.length];
+
+document.getElementById("username").value=load("name","");
+document.getElementById("username").oninput=e=>save("name",e.target.value);
+
+let header="<tr><th class='habit'>Daily Habits</th>";
+for(let d=1;d<=days;d++)header+=`<th>${d}</th>`;
+header+="</tr>";
+table.innerHTML+=header;
+
+habits.forEach((h,i)=>{
+  let row=`<tr><td class='habit'>${h}</td>`;
+  for(let d=0;d<days;d++){
+    row+=`<td><input type="checkbox" onchange="toggle(${i},${d})"></td>`;
+  }
+  row+="</tr>";
+  table.innerHTML+=row;
+});
+
+let bat="<tr><td class='habit'>Your Faith Battery</td>";
+for(let d=0;d<days;d++){
+  bat+=`<td><div class="battery"><div class="fill" id="b${d}"></div></div></td>`;
+}
+bat+="</tr>";
+table.innerHTML+=bat;
+
+function toggle(h,d){
+  sound.play();
+  let data=load("checks",{});
+  data[`${h}-${d}`]=!data[`${h}-${d}`];
+  save("checks",data);
+  update();
+}
+
+function update(){
+  let data=load("checks",{});
+  let total=habits.length*days,done=0,full=0;
+
+  document.querySelectorAll("input[type=checkbox]").forEach((cb,i)=>{
+    let h=Math.floor(i/days),d=i%days;
+    cb.checked=!!data[`${h}-${d}`];
+  });
+
+  for(let d=0;d<days;d++){
+    let c=0;
+    for(let h=0;h<habits.length;h++){
+      if(data[`${h}-${d}`]){done++;c++;}
+    }
+    document.getElementById("b"+d).style.height=
+    Math.round((c/habits.length)*100)+"%";
+    if(c===habits.length)full++;
+  }
+
+  document.getElementById("progressFill").style.width=
+  Math.round((done/total)*100)+"%";
+
+  if(full===30){
+    document.getElementById("finalMessage").innerText=
+    `Congratulations ${load("name","")}! Your faith battery is fully charged 🤍`;
+  }
+}
+
+function resetAll(){
+  if(confirm("Reset all your progress?")){
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+update();
+</script>
+
+</body>
+</html>
