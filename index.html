@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ramadhan Planning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --main:#b89cff;
+  --soft:#f4efff;
+  --dark:#5f46c7;
+}
+
+body{
+  margin:0;
+  font-family:"Segoe UI",sans-serif;
+  background:var(--soft);
+  color:#222;
+}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  font-size:40px;
+  color:var(--dark);
+}
+
+header{
+  background:var(--main);
+  padding:20px;
+  border-radius:22px;
+  text-align:center;
+  color:white;
+}
+
+input,select{
+  padding:8px 12px;
+  border-radius:10px;
+  border:none;
+  margin:6px;
+}
+
+.progress-box{
+  margin:20px 0;
+}
+
+.progress-bar{
+  height:18px;
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:var(--dark);
+  transition:.4s;
+}
+
+.quote{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  margin:15px 0;
+  text-align:center;
+  font-style:italic;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+}
+
+th{
+  background:var(--main);
+  color:white;
+  position:sticky;
+  top:0;
+}
+
+.habit{
+  text-align:left;
+  font-weight:600;
+  background:#f7f3ff;
+  position:sticky;
+  left:0;
+}
+
+.red-day input{
+  accent-color:#ff4d4d;
+}
+
+.battery{
+  width:22px;
+  height:42px;
+  border:2px solid var(--dark);
+  border-radius:6px;
+  margin:auto;
+  position:relative;
+}
+
+.battery::after{
+  content:"";
+  width:10px;
+  height:4px;
+  background:var(--dark);
+  position:absolute;
+  top:-6px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.fill{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:0%;
+  background:var(--main);
+  transition:.3s;
+}
+
+#scoreBox,#finalMessage{
+  text-align:center;
+  font-size:22px;
+  margin:20px;
+  font-weight:bold;
+  color:var(--dark);
+}
+
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:14px;
+  background:var(--dark);
+  color:white;
+  cursor:pointer;
+}
+
+footer{
+  text-align:center;
+  margin-top:30px;
+  font-size:14px;
+  color:#666;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Ramadhan Planning</h1>
+
+<header>
+  <input id="name" placeholder="Enter your name">
+  <div class="controls">
+    <select id="theme">
+      <option value="#b89cff">Soft Lilac</option>
+      <option value="#f7b2d9">Soft Pink</option>
+      <option value="#a7c7ff">Soft Blue</option>
+      <option value="#aee5d8">Soft Mint</option>
+      <option value="#ffc9a9">Soft Peach</option>
+      <option value="#d6c9ff">Soft Lavender</option>
+      <option value="#c4b1a1">Soft Milo</option>
+      <option value="#d6d6d6">Soft Grey</option>
+    </select>
+  </div>
+</header>
+
+<div class="progress-box">
+  <strong>Total Progress</strong>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<div class="quote" id="quote"></div>
+
+<table id="planner"></table>
+
+<div id="scoreBox"></div>
+<div id="finalMessage"></div>
+
+<div class="controls">
+  <button onclick="showFinalScore()">Finish & View My Score</button>
+  <button onclick="resetAll()">Reset My Planner</button>
+</div>
+
+<footer>
+  This site was created by Auza — Instagram: @luzvacia_
+</footer>
+
+<audio id="sound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-click-1110.mp3">
+</audio>
+
+</div>
+
+<script>
+const habits=[
+"Tahajud","Fasting","Qobliyah Subuh","Subuh","Morning Dhikr",
+"Qur'an Recitation","Dhuha","Dzuhur","Ashar","Evening Dhikr",
+"Maghrib","Ba'diyah Maghrib","Isya","Taraweh","Al-Kahfi"
+];
+
+const kahfiDays=[2,9,16,23,30];
+const days=30;
+const quotes=[
+"Indeed, prayer keeps one from immorality. (29:45)",
+"So remember Me; I will remember you. (2:152)",
+"Allah does not burden a soul beyond its capacity. (2:286)"
+];
+
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const load=(k,d)=>JSON.parse(localStorage.getItem(k))||d;
+
+document.getElementById("quote").innerText=
+quotes[new Date().getDate()%quotes.length];
+
+document.getElementById("name").value=load("name","");
+document.getElementById("name").oninput=e=>save("name",e.target.value);
+
+document.getElementById("theme").value=load("theme","#b89cff");
+document.getElementById("theme").onchange=e=>{
+  document.documentElement.style.setProperty("--main",e.target.value);
+  save("theme",e.target.value);
+};
+document.documentElement.style.setProperty("--main",load("theme","#b89cff"));
+
+const table=document.getElementById("planner");
+let header="<tr><th class='habit'>Daily Habits</th>";
+for(let d=1;d<=days;d++)header+=`<th>${d}</th>`;
+header+="</tr>";
+table.innerHTML+=header;
+
+habits.forEach((h,i)=>{
+  let row=`<tr><td class='habit'>${h}</td>`;
+  for(let d=1;d<=days;d++){
+    if(h==="Al-Kahfi" && !kahfiDays.includes(d)){
+      row+="<td></td>";
+    }else{
+      row+=`<td><input type="checkbox" onchange="toggle(${i},${d})"></td>`;
+    }
+  }
+  row+="</tr>";
+  table.innerHTML+=row;
+});
+
+let red=`<tr class="red-day"><td class='habit'>Red Day</td>`;
+for(let d=1;d<=days;d++)red+=`<td><input type="checkbox"></td>`;
+red+="</tr>";
+table.innerHTML+=red;
+
+let bat=`<tr><td class='habit'>Your Faith Battery</td>`;
+for(let d=1;d<=days;d++){
+  bat+=`<td><div class="battery"><div class="fill" id="b${d}"></div></div></td>`;
+}
+bat+="</tr>";
+table.innerHTML+=bat;
+
+const sound=document.getElementById("sound");
+
+function toggle(h,d){
+  sound.play();
+  let data=load("checks",{});
+  data[`${h}-${d}`]=!data[`${h}-${d}`];
+  save("checks",data);
+  update();
+}
+
+function update(){
+  let data=load("checks",{});
+  let done=0,total=0;
+
+  habits.forEach((h,i)=>{
+    for(let d=1;d<=days;d++){
+      if(h==="Al-Kahfi" && !kahfiDays.includes(d))continue;
+      total++;
+      if(data[`${i}-${d}`])done++;
+    }
+  });
+
+  for(let d=1;d<=days;d++){
+    let c=0,n=0;
+    habits.forEach((h,i)=>{
+      if(h==="Al-Kahfi" && !kahfiDays.includes(d))return;
+      n++;
+      if(data[`${i}-${d}`])c++;
+    });
+    document.getElementById("b"+d).style.height=Math.round(c/n*100)+"%";
+  }
+
+  document.getElementById("progressFill").style.width=
+  Math.round(done/total*100)+"%";
+
+  save("score",{done,total});
+}
+
+function showFinalScore(){
+  const s=load("score",{done:0,total:1});
+  document.getElementById("finalMessage").innerText=
+  `Your Final Score: ${Math.round(s.done/s.total*100)}% 
+  (${s.done} tasks completed)`;
+}
+
+function resetAll(){
+  if(confirm("Reset all your progress?")){
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+update();
+</script>
+
+</body>
+</html>
