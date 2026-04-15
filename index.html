@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Money Tracker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .income { color: green; }
+    .expense { color: red; }
+  </style>
+</head>
+<body>
+
+<h2>Money Tracker</h2>
+
+<input type="date" id="date">
+<input type="number" id="income" placeholder="Pemasukan">
+<input type="number" id="expense" placeholder="Pengeluaran">
+<input type="text" id="category" placeholder="Kategori">
+<input type="text" id="note" placeholder="Keterangan">
+
+<button onclick="addData()">Tambah</button>
+
+<h3>Saldo: <span id="balance">0</span></h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tanggal</th>
+      <th>Pemasukan</th>
+      <th>Pengeluaran</th>
+      <th>Kategori</th>
+      <th>Keterangan</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let data = [];
+let balance = 0;
+
+function addData() {
+  let d = document.getElementById("date").value;
+  let i = parseInt(document.getElementById("income").value) || 0;
+  let e = parseInt(document.getElementById("expense").value) || 0;
+  let c = document.getElementById("category").value;
+  let n = document.getElementById("note").value;
+
+  data.push({d, i, e, c, n});
+  render();
+}
+
+function render() {
+  let body = document.getElementById("tableBody");
+  body.innerHTML = "";
+  balance = 0;
+
+  data.forEach((item, index) => {
+    balance += item.i - item.e;
+
+    let row = `
+      <tr>
+        <td>${item.d}</td>
+        <td class="income">${item.i}</td>
+        <td class="expense">${item.e}</td>
+        <td>${item.c}</td>
+        <td>${item.n}</td>
+        <td>
+          <button onclick="editData(${index})">Edit</button>
+          <button onclick="deleteData(${index})">Hapus</button>
+        </td>
+      </tr>
+    `;
+    body.innerHTML += row;
+  });
+
+  document.getElementById("balance").innerText = balance;
+}
+
+function deleteData(index) {
+  data.splice(index, 1);
+  render();
+}
+
+function editData(index) {
+  let item = data[index];
+  document.getElementById("date").value = item.d;
+  document.getElementById("income").value = item.i;
+  document.getElementById("expense").value = item.e;
+  document.getElementById("category").value = item.c;
+  document.getElementById("note").value = item.n;
+
+  deleteData(index);
+}
+</script>
+
+</body>
+  </html>
